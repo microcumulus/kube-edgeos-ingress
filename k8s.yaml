@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edgeos-ingress
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edgeos-ingress
+      tier: routing
+  template:
+    metadata:
+      labels:
+        app: edgeos-ingress
+        tier: routing
+    spec:
+      containers:
+      - name: edgeos-ingress
+        image: andrewstuart/edgeos-ingress
+        imagePullPolicy: Always
+        command:
+          - app
+          - -in-cluster
+          - -logtostderr
+          - -interval=2m
+        resources:
+          requests:
+            cpu: 20m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        env:
+        - name: ERLITE_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: edgeos-conf
+              key: addr
+        - name: ERLITE_USER
+          valueFrom:
+            secretKeyRef:
+              name: edgeos-conf
+              key: user
+        - name: ERLITE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: edgeos-conf
+              key: pass
